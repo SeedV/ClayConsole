@@ -10,26 +10,21 @@ namespace ClayTextScreen {
     private Vector2 _padding = new Vector2();
     private Vector2 _charSize = new Vector2();
     private Vector3 _charScale = new Vector3();
+    private Vector3 _cursorScale = new Vector3();
     private float _baseLineHeight = 0;
 
 
     public FlatScreen() {
       _charset = new AsciiCharset();
-      UpdateLocationParameters();
     }
 
     protected override void PlaceGlyphObject(int row, int col, GameObject glyphObject) {
-      float x = _origin.x + _padding.x + col * (_charSize.x + _padding.x);
-      float y = _origin.y - _padding.y - (row + 1) * (_charSize.y + _padding.y) + _baseLineHeight;
-      glyphObject.transform.localPosition = new Vector3(x, y, 0f);
+      var o = GetCharTopLeft(row, col);
+      glyphObject.transform.position = new Vector3(o.x, o.y - _charSize.y + _baseLineHeight, 0f);
       glyphObject.transform.localScale = _charScale;
     }
 
     protected override void OnUpdateSize(int row, int col) {
-      UpdateLocationParameters();
-    }
-
-    private void UpdateLocationParameters() {
       _origin.x = -_width / 2f + _margin;
       _origin.y = _height / 2f - _margin;
       _padding.x = (_width - 2 * _margin) / Cols / 20f;
@@ -39,7 +34,23 @@ namespace ClayTextScreen {
       _charScale.x = 100f * _charSize.x;
       _charScale.y = (_height / _width) * 100f * _charSize.y;
       _charScale.z = 200f;
+      _cursorScale.x = _charSize.x;
+      _cursorScale.y = _charSize.y;
+      _cursorScale.z = .3f;
       _baseLineHeight = _charSize.y * .25f;
+    }
+
+    private Vector2 GetCharTopLeft(int row, int col) {
+      float x = _origin.x + _padding.x + col * (_charSize.x + _padding.x);
+      float y = _origin.y - _padding.y - row * (_charSize.y + _padding.y);
+      return new Vector2(x, y);
+    }
+
+    protected override void OnUpdateCursorPos(int row, int col) {
+      var o = GetCharTopLeft(row, col);
+      _cursor.transform.position =
+          new Vector3(o.x + _charSize.x / 2f, o.y - _charSize.y / 2.5f, 0f);
+      _cursor.transform.localScale = _cursorScale;
     }
   }
 }
