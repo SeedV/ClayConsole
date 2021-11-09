@@ -1,6 +1,4 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 
 namespace ClayTextScreen {
   internal abstract class BaseCharset {
@@ -20,7 +18,7 @@ namespace ClayTextScreen {
     // * Letters
     // * Digits
     // * Punctuations
-    // * Other visible symbols
+    // * Other visible symbols excluding spaces
     //
     // Invisible characters:
     // * Spaces
@@ -43,6 +41,12 @@ namespace ClayTextScreen {
     }
 
     public abstract bool IsNewline(uint charCode);
+
+    public bool IsTab(char c) {
+      return IsTab((uint)c);
+    }
+
+    public abstract bool IsTab(uint charCode);
 
     public string GetGlyphName(char c) {
       return GetGlyphName((uint)c);
@@ -98,6 +102,10 @@ namespace ClayTextScreen {
 
     public override bool IsNewline(uint charCode) {
       return charCode == 0x0a || charCode == 0x0d;
+    }
+
+    public override bool IsTab(uint charCode) {
+      return charCode == '\t';
     }
 
     public override bool IsVisible(uint charCode) {

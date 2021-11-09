@@ -69,7 +69,7 @@ namespace ClayTextScreen {
         case KeyCode n when (n >= KeyCode.A && n <= KeyCode.Z):
           {
             int i = (int)e.keyCode - (int)KeyCode.A;
-            c = (e.capsLock ^ e.shift) ? (char)('A' + i) : (char)('a' + i);
+            c = (e.capsLock || e.shift) ? (char)('A' + i) : (char)('a' + i);
             if (e.control) {
               controlKey = (ControlKey)((int)ControlKey.CtrlA + i);
             }
@@ -172,7 +172,11 @@ namespace ClayTextScreen {
         case KeyCode.PageDown:
           controlKey = ControlKey.PageDown;
           break;
+        case KeyCode.None:
+          ret = false;
+          break;
         default:
+          Debug.Log($"Unsupported keyCode ${e.keyCode}");
           ret = false;
           break;
       }

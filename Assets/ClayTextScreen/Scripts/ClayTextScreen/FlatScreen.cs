@@ -51,7 +51,7 @@ namespace ClayTextScreen {
     }
 
     private protected override void ScrollScreen(int lines) {
-      Debug.Log("Scrolling...");
+      Debug.Log($"Scrolling {lines} lines...");
     }
 
     private Vector2 GetCharTopLeft(int row, int col) {

@@ -28,6 +28,19 @@ namespace ClayTextScreen {
     private int _cursorRow = 0;
     private int _cursorCol = 0;
 
+    public int SpacesPerTab { get; set; } = 4;
+
+    public bool Scrollable { get; set; } = true;
+
+    public bool CursorVisible {
+      get {
+        return _cursor.activeSelf;
+      }
+      set {
+        _cursor.SetActive(value);
+      }
+    }
+
     public int Rows {
       get {
         return _rows;
@@ -76,46 +89,28 @@ namespace ClayTextScreen {
       }
     }
 
-    public void Show(int row, int col) {
-      if (_buffer.TryGetValue((row, col), out var glyph)) {
-        glyph.glyphObject.SetActive(true);
-      }
-    }
-
-    public void Hide(int row, int col) {
-      if (_buffer.TryGetValue((row, col), out var glyph)) {
-        glyph.glyphObject.SetActive(false);
-      }
-    }
-
-    public void ShowCursor() {
-      _cursor.SetActive(true);
-    }
-
-    public void HideCursor() {
-      _cursor.SetActive(false);
-    }
-
+    // Only visible and space characters are accepted. The cursor position is not affected by this
+    // method.
     public void PutChar(int row, int col, char c) {
       uint charCode = (uint)c;
       if (_glyphs.TryGetValue(charCode, out var glyphRefObject)) {
         // The new object is cloned from the reference object. The life cycle of the new object is
         // maintained by _buffer.
-        if (_buffer.TryGetValue((row, col), out var existing)) {
+        if (_buffer.TryGetValue((row, col), out var existing) && existing.glyphObject) {
           Destroy(existing.glyphObject);
         }
         var glyphObject = Instantiate(glyphRefObject);
+        glyphObject.SetActive(true);
         glyphObject.transform.parent = transform;
-        _buffer.Add((row, col), (c, glyphObject));
+        _buffer[(row, col)] = (c, glyphObject);
         PlaceGlyphObject(row, col, glyphObject);
-        Show(row, col);
-        MoveCursorToNext();
-      } else if (_charset.IsNewline(c)) {
-        MoveCursorToNewline();
-      } else if (_charset.IsSpace(c)) {
-        MoveCursorToNext();
+      } else if (_charset.IsSpace(charCode)) {
+        // Since spaces have no corresponding 3D glyphs, _buffer simply keeps a null reference for
+        // every one of them.
+        _buffer[(row, col)] = (c, null);
       } else {
-        Debug.LogError($"The character U+{charCode:4X} is not supported by the screen charset.");
+        Debug.LogError(
+            $"The character U+{charCode:X4} is not visible or not supported by the charset.");
       }
     }
 
@@ -130,12 +125,34 @@ namespace ClayTextScreen {
     }
 
     public void Write(string s) {
+      if (!string.IsNullOrEmpty(s)) {
+        foreach (char c in s) {
+          if (_charset.IsVisible(c) || _charset.IsSpace(c)) {
+            PutChar(CursorRow, CursorCol, c);
+            MoveCursorToNext();
+          } else if (_charset.IsNewline(c)) {
+            MoveCursorToNewline();
+          } else if (_charset.IsTab(c)) {
+            for (int i = 0; i < SpacesPerTab; i++) {
+              PutChar(CursorRow, CursorCol, ' ');
+              MoveCursorToNext();
+            }
+          }
+        }
+      }
     }
 
     public void WriteLine(string s) {
+      Write(s + '\n');
     }
 
-    void Start() {
+    public void Scroll(int lines) {
+      if (Scrollable) {
+        ScrollScreen(lines);
+      }
+    }
+
+    void Awake() {
       _charset = InitCharset();
       _keyboard = InitKeyboard();
       // Associates local references to child objects.
@@ -152,14 +169,12 @@ namespace ClayTextScreen {
       OnUpdateCursorPos(CursorRow, CursorCol);
     }
 
-    void Update() {
-    }
-
     void OnGUI() {
       if (Event.current.type == EventType.KeyDown &&
           _keyboard.TryConvertKeyCode(Event.current, out char c, out ControlKey controlKey)) {
-        c = c != 0 ? c : '0';
-        Debug.Log($"{c}, {controlKey}");
+        if (c != '\0') {
+          Write(c.ToString());
+        }
       }
     }
 
@@ -182,7 +197,7 @@ namespace ClayTextScreen {
         CursorCol = 0;
         CursorRow++;
       } else {
-        ScrollScreen(1);
+        Scroll(1);
         CursorCol = 0;
       }
     }
@@ -192,7 +207,7 @@ namespace ClayTextScreen {
         CursorCol = 0;
         CursorRow++;
       } else {
-        ScrollScreen(1);
+        Scroll(1);
         CursorCol = 0;
       }
     }
