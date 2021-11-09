@@ -90,14 +90,17 @@ namespace ClayTextScreen {
     }
 
     // Only visible and space characters are accepted. The cursor position is not affected by this
-    // method.
+    // method. If a '\0' character is passed and there is an existing character in the position, the
+    // existing character will be removed.
     public void PutChar(int row, int col, char c) {
       uint charCode = (uint)c;
+      bool hasOldValue = _buffer.TryGetValue((row, col), out var oldValue);
+
       if (_glyphs.TryGetValue(charCode, out var glyphRefObject)) {
         // The new object is cloned from the reference object. The life cycle of the new object is
         // maintained by _buffer.
-        if (_buffer.TryGetValue((row, col), out var existing) && existing.glyphObject) {
-          Destroy(existing.glyphObject);
+        if (hasOldValue && oldValue.glyphObject) {
+          Destroy(oldValue.glyphObject);
         }
         var glyphObject = Instantiate(glyphRefObject);
         glyphObject.SetActive(true);
@@ -107,10 +110,18 @@ namespace ClayTextScreen {
       } else if (_charset.IsSpace(charCode)) {
         // Since spaces have no corresponding 3D glyphs, _buffer simply keeps a null reference for
         // every one of them.
+        if (hasOldValue && oldValue.glyphObject) {
+          Destroy(oldValue.glyphObject);
+        }
         _buffer[(row, col)] = (c, null);
+      } else if (c == '\0') {
+        if (hasOldValue && oldValue.glyphObject) {
+          Destroy(oldValue.glyphObject);
+          _buffer.Remove((row, col));
+        }
       } else {
         Debug.LogError(
-            $"The character U+{charCode:X4} is not visible or not supported by the charset.");
+            $"The character U+{charCode:X4} is not supported by PutChar.");
       }
     }
 
@@ -147,8 +158,20 @@ namespace ClayTextScreen {
     }
 
     public void Scroll(int lines) {
-      if (Scrollable) {
-        ScrollScreen(lines);
+      if (!Scrollable) {
+        return;
+      }
+      for (int i = 0; i < lines; i++) {
+        for (int row = 0; row < Rows; row++) {
+          for (int col = 0; col < Cols; col++) {
+            if (row < Rows - 1) {
+              TryGetChar(row + 1, col, out char c);
+              PutChar(row, col, c);
+            } else {
+              PutChar(row, col, '\0');
+            }
+          }
+        }
       }
     }
 
@@ -183,8 +206,6 @@ namespace ClayTextScreen {
     private protected abstract void OnUpdateCursorPos(int row, int col);
 
     private protected abstract void PlaceGlyphObject(int row, int col, GameObject glyphObject);
-
-    private protected abstract void ScrollScreen(int lines);
 
     private protected abstract BaseCharset InitCharset();
 

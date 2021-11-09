@@ -50,10 +50,6 @@ namespace ClayTextScreen {
           new Vector3(o.x + _charSize.x / 2f, o.y - _charSize.y / 2.5f, 0f);
     }
 
-    private protected override void ScrollScreen(int lines) {
-      Debug.Log($"Scrolling {lines} lines...");
-    }
-
     private Vector2 GetCharTopLeft(int row, int col) {
       float x = _origin.x + _padding.x + col * (_charSize.x + _padding.x);
       float y = _origin.y - _padding.y - row * (_charSize.y + _padding.y);
