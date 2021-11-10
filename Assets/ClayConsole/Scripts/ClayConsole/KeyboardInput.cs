@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace ClayTextScreen {
+namespace ClayConsole {
   public enum ControlKey
   {
     None = 0,

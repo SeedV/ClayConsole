@@ -1,7 +1,7 @@
 using UnityEngine;
 
-namespace ClayTextScreen {
-  public class FlatScreen : BaseScreen {
+namespace ClayConsole {
+  public class FlatConsole : BaseConsole {
     private const float _width = 40f;
     private const float _height = 30f;
     private const float _margin = 1f;

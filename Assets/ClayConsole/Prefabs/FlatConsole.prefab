@@ -376,7 +376,7 @@ GameObject:
   - component: {fileID: 6766630149001774290}
   - component: {fileID: 6766630149001774291}
   m_Layer: 0
-  m_Name: FlatScreen
+  m_Name: FlatConsole
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

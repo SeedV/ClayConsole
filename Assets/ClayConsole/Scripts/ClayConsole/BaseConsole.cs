@@ -1,9 +1,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace ClayTextScreen {
-  // The base class of all kinds of screens.
-  public abstract class BaseScreen : MonoBehaviour {
+namespace ClayConsole {
+  // The base class of all kinds of Consoles.
+  public abstract class BaseConsole : MonoBehaviour {
     private const string _screenObjectName = "Screen";
     private const string _cursorObjectName = "Cursor";
     private const string _glyphsObjectNamePrefix = "Glyphs/";

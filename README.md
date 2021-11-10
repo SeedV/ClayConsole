@@ -1,4 +1,4 @@
-# clay-text-screen
+# ClayConsole
 
 A Unity in-game console with 3D text glyphs.
 

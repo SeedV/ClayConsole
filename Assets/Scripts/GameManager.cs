@@ -1,11 +1,11 @@
 using UnityEngine;
-using ClayTextScreen;
+using ClayConsole;
 
 public class GameManager : MonoBehaviour {
-  public FlatScreen Screen;
+  public FlatConsole Console;
 
   void Start() {
-    Screen.Write("Hello, World!");
+    Console.Write("Hello, World!");
   }
 
   void Update() {

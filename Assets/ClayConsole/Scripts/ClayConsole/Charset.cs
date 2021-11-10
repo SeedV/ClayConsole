@@ -1,6 +1,6 @@
 using System.Collections;
 
-namespace ClayTextScreen {
+namespace ClayConsole {
   internal abstract class BaseCharset {
     private const string _glyphObjectNamePattern = "U{0:X4}";
 
