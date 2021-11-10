@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace ClayConsole {
@@ -9,12 +10,11 @@ namespace ClayConsole {
   // The base class of all kinds of Consoles.
   public class MainConsole : MonoBehaviour {
     private readonly IKeyboardInput _keyboard = new EnUsKeyboardInput();
+    private InputManager _inputManager = null;
 
     public ScreenType ScreenType = ScreenType.FlatScreen;
 
     public BaseScreen Screen { get; private set; }
-
-    public int SpacesPerTab { get; set; } = 4;
 
     public void Write(string s) {
       Write(s, BaseScreen._defaultColor);
@@ -23,17 +23,7 @@ namespace ClayConsole {
     public void Write(string s, Color color) {
       if (!string.IsNullOrEmpty(s)) {
         foreach (char c in s) {
-          if (Screen._charset.IsVisible(c) || Screen._charset.IsSpace(c)) {
-            Screen.PutChar(Screen.CursorRow, Screen.CursorCol, c, color);
-            MoveCursorToNext();
-          } else if (Screen._charset.IsNewline(c)) {
-            MoveCursorToNewline();
-          } else if (Screen._charset.IsTab(c)) {
-            for (int i = 0; i < SpacesPerTab; i++) {
-              Screen.PutChar(Screen.CursorRow, Screen.CursorCol, ' ');
-              MoveCursorToNext();
-            }
-          }
+          Screen.WriteChar(c, color);
         }
       }
     }
@@ -46,12 +36,12 @@ namespace ClayConsole {
       Write(s + '\n', color);
     }
 
-    public char Read() {
-      return '\0';
+    public void StartReadLineLoop(Func<string, bool> readLineCallback) {
+      _inputManager.StartReadLineLoop(readLineCallback);
     }
 
-    public string ReadLine() {
-      return null;
+    public void StopReadLineLoop() {
+      _inputManager.StopReadLineLoop();
     }
 
     void Awake() {
@@ -60,38 +50,15 @@ namespace ClayConsole {
           Screen = new FlatScreen(gameObject);
           break;
         default:
-          throw new System.NotSupportedException($"Screen type {ScreenType} is not supported yet.");
+          throw new NotSupportedException($"Screen type {ScreenType} is not supported yet.");
       }
+      _inputManager = new InputManager(Screen);
     }
 
     void OnGUI() {
       if (Event.current.type == EventType.KeyDown &&
           _keyboard.TryConvertKeyCode(Event.current, out char c, out ControlKey controlKey)) {
-        if (c != '\0') {
-          Write(c.ToString());
-        }
-      }
-    }
-
-    private void MoveCursorToNext() {
-      if (Screen.CursorCol < Screen.Cols - 1) {
-        Screen.CursorCol++;
-      } else if (Screen.CursorRow < Screen.Rows - 1) {
-        Screen.CursorCol = 0;
-        Screen.CursorRow++;
-      } else {
-        Screen.Scroll(1);
-        Screen.CursorCol = 0;
-      }
-    }
-
-    private void MoveCursorToNewline() {
-      if (Screen.CursorRow < Screen.Rows - 1) {
-        Screen.CursorCol = 0;
-        Screen.CursorRow++;
-      } else {
-        Screen.Scroll(1);
-        Screen.CursorCol = 0;
+        _inputManager.OnKeyInput(c, controlKey);
       }
     }
   }

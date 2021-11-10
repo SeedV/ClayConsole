@@ -11,9 +11,9 @@ namespace ClayConsole {
     private const string _glyphsObjectNamePrefix = "Glyphs/";
     private const string _mainColor = "_Color";
     private const int _minRows = 10;
-    private const int _maxRows = 80;
+    private const int _maxRows = 50;
     private const int _minCols = 10;
-    private const int _maxCols = 160;
+    private const int _maxCols = 100;
 
     internal BaseCharset _charset = null;
     internal IKeyboardInput _keyboard = null;
@@ -88,6 +88,8 @@ namespace ClayConsole {
       }
     }
 
+    public int SpacesPerTab { get; set; } = 4;
+
     public bool Scrollable { get; set; } = true;
 
     public BaseScreen(GameObject mainConsole, int rows, int cols) {
@@ -136,6 +138,26 @@ namespace ClayConsole {
       }
     }
 
+    // Visible characters, spaces, enter characters and tabs are accepted. The cursor position is
+    // affected by this method.
+    public void WriteChar(char c) {
+      WriteChar(c, _defaultColor);
+    }
+
+    public void WriteChar(char c, Color color) {
+      if (_charset.IsVisible(c) || _charset.IsSpace(c)) {
+        PutChar(CursorRow, CursorCol, c, color);
+        MoveCursorToNext();
+      } else if (_charset.IsNewline(c)) {
+        MoveCursorToNewline();
+      } else if (_charset.IsTab(c)) {
+        for (int i = 0; i < SpacesPerTab; i++) {
+          PutChar(CursorRow, CursorCol, ' ');
+          MoveCursorToNext();
+        }
+      }
+    }
+
     public void DeleteChar(int row, int col) {
       if (_buffer.TryGetValue((row, col), out var oldValue)) {
         if (oldValue.glyphObject) {
@@ -159,6 +181,28 @@ namespace ClayConsole {
         c = '\0';
         color = _defaultColor;
         return false;
+      }
+    }
+
+    public void MoveCursorToNext() {
+      if (CursorCol < Cols - 1) {
+        CursorCol++;
+      } else if (CursorRow < Rows - 1) {
+        CursorCol = 0;
+        CursorRow++;
+      } else {
+        Scroll(1);
+        CursorCol = 0;
+      }
+    }
+
+    public void MoveCursorToNewline() {
+      if (CursorRow < Rows - 1) {
+        CursorCol = 0;
+        CursorRow++;
+      } else {
+        Scroll(1);
+        CursorCol = 0;
       }
     }
 
