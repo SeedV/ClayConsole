@@ -93,6 +93,10 @@ namespace ClayTextScreen {
     // method. If a '\0' character is passed and there is an existing character in the position, the
     // existing character will be removed.
     public void PutChar(int row, int col, char c) {
+      PutChar(row, col, c, Color.yellow);
+    }
+
+    public void PutChar(int row, int col, char c, Color color) {
       uint charCode = (uint)c;
       bool hasOldValue = _buffer.TryGetValue((row, col), out var oldValue);
 
@@ -104,6 +108,7 @@ namespace ClayTextScreen {
         }
         var glyphObject = Instantiate(glyphRefObject);
         glyphObject.SetActive(true);
+        glyphObject.GetComponent<Renderer>().material.SetColor("_Color", color);
         glyphObject.transform.parent = transform;
         _buffer[(row, col)] = (c, glyphObject);
         PlaceGlyphObject(row, col, glyphObject);
