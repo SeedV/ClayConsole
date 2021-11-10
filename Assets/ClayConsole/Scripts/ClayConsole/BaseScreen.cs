@@ -140,20 +140,21 @@ namespace ClayConsole {
 
     // Visible characters, spaces, enter characters and tabs are accepted. The cursor position is
     // affected by this method.
-    public void WriteChar(char c) {
-      WriteChar(c, _defaultColor);
+    public void WriteChar(char c, out int lineScrolled) {
+      WriteChar(c, _defaultColor, out lineScrolled);
     }
 
-    public void WriteChar(char c, Color color) {
+    public void WriteChar(char c, Color color, out int lineScrolled) {
+      lineScrolled = 0;
       if (_charset.IsVisible(c) || _charset.IsSpace(c)) {
         PutChar(CursorRow, CursorCol, c, color);
-        MoveCursorToNext();
+        MoveCursorToNext(out lineScrolled);
       } else if (_charset.IsNewline(c)) {
-        MoveCursorToNewline();
+        MoveCursorToNewline(out lineScrolled);
       } else if (_charset.IsTab(c)) {
         for (int i = 0; i < SpacesPerTab; i++) {
           PutChar(CursorRow, CursorCol, ' ');
-          MoveCursorToNext();
+          MoveCursorToNext(out lineScrolled);
         }
       }
     }
@@ -184,7 +185,8 @@ namespace ClayConsole {
       }
     }
 
-    public void MoveCursorToNext() {
+    public void MoveCursorToNext(out int lineScrolled) {
+      lineScrolled = 0;
       if (CursorCol < Cols - 1) {
         CursorCol++;
       } else if (CursorRow < Rows - 1) {
@@ -192,16 +194,28 @@ namespace ClayConsole {
         CursorRow++;
       } else {
         Scroll(1);
+        lineScrolled = 1;
         CursorCol = 0;
       }
     }
 
-    public void MoveCursorToNewline() {
+    public void MoveCursorToPrev() {
+      if (CursorCol > 0) {
+        CursorCol--;
+      } else if (CursorRow > 0) {
+        CursorCol = Cols - 1;
+        CursorRow--;
+      }
+    }
+
+    public void MoveCursorToNewline(out int lineScrolled) {
+      lineScrolled = 0;
       if (CursorRow < Rows - 1) {
         CursorCol = 0;
         CursorRow++;
       } else {
         Scroll(1);
+        lineScrolled = 1;
         CursorCol = 0;
       }
     }

@@ -23,7 +23,7 @@ namespace ClayConsole {
     public void Write(string s, Color color) {
       if (!string.IsNullOrEmpty(s)) {
         foreach (char c in s) {
-          Screen.WriteChar(c, color);
+          Screen.WriteChar(c, color, out int _);
         }
       }
     }
@@ -56,7 +56,7 @@ namespace ClayConsole {
     }
 
     void OnGUI() {
-      if (Event.current.type == EventType.KeyDown &&
+      if (_inputManager.Active && Event.current.type == EventType.KeyDown &&
           _keyboard.TryConvertKeyCode(Event.current, out char c, out ControlKey controlKey)) {
         _inputManager.OnKeyInput(c, controlKey);
       }
