@@ -82,12 +82,14 @@ namespace ClayConsole {
           c = '/';
           break;
         case KeyCode.KeypadMultiply:
+        case KeyCode.Asterisk:
           c = '*';
           break;
         case KeyCode.KeypadMinus:
           c = '-';
           break;
         case KeyCode.KeypadPlus:
+        case KeyCode.Plus:
           c = '+';
           break;
         case KeyCode.KeypadEnter:
