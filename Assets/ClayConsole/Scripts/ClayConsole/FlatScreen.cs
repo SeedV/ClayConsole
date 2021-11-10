@@ -1,7 +1,9 @@
 using UnityEngine;
 
 namespace ClayConsole {
-  public class FlatConsole : BaseConsole {
+  public class FlatScreen : BaseScreen {
+    private const int _defaultRows = 15;
+    private const int _defaultCols = 40;
     private const float _width = 40f;
     private const float _height = 30f;
     private const float _margin = 1f;
@@ -13,21 +15,21 @@ namespace ClayConsole {
     private Vector3 _cursorScale = new Vector3();
     private float _baseLineHeight = 0;
 
-    private protected override BaseCharset InitCharset() {
+    public FlatScreen(GameObject mainConsole, int rows = _defaultRows, int cols = _defaultCols)
+        : base(mainConsole, rows, cols) {
+    }
+
+    internal override BaseCharset InitCharset() {
       return new AsciiCharset();
     }
 
-    private protected override IKeyboardInput InitKeyboard() {
-      return new EnUsKeyboardInput();
-    }
-
-    private protected override void PlaceGlyphObject(int row, int col, GameObject glyphObject) {
+    internal override void PlaceGlyphObject(int row, int col, GameObject glyphObject) {
       var o = GetCharTopLeft(row, col);
       glyphObject.transform.position = new Vector3(o.x, o.y - _charSize.y + _baseLineHeight, 0f);
       glyphObject.transform.localScale = _charScale;
     }
 
-    private protected override void OnUpdateSize(int row, int col) {
+    internal override void OnUpdateSize(int row, int col) {
       _origin.x = -_width / 2f + _margin;
       _origin.y = _height / 2f - _margin;
       _padding.x = (_width - 2 * _margin) / Cols / 20f;
@@ -44,7 +46,7 @@ namespace ClayConsole {
       _cursor.transform.localScale = _cursorScale;
     }
 
-    private protected override void OnUpdateCursorPos(int row, int col) {
+    internal override void OnUpdateCursorPos(int row, int col) {
       var o = GetCharTopLeft(row, col);
       _cursor.transform.position =
           new Vector3(o.x + _charSize.x / 2f, o.y - _charSize.y / 2.5f, 0f);

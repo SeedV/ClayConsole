@@ -2,9 +2,9 @@ using UnityEngine;
 using ClayConsole;
 
 public class GameManager : MonoBehaviour {
-  public FlatConsole Console;
+  public MainConsole MainConsole;
 
   void Start() {
-    Console.Write("Hello, World!");
+    MainConsole.Write("Hello, World!");
   }
 }
