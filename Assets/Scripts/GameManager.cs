@@ -13,7 +13,7 @@ public class Shell
     [Preserve]
     public void Print(StringValue s)
     {
-        GameManager.Instance.MainConsole.WriteLine(s.ToString());
+        GameManager.Instance.MainConsole.WriteLine(s.ToString(), Color.cyan);
     }
 }
 
@@ -65,7 +65,7 @@ public class GameManager : MonoBehaviour {
         }
         if (_engine.StackCount > 0) {
           BaseValue value = _engine.StackPop();
-          MainConsole.WriteLine(value.ToDisplayString());
+          MainConsole.WriteLine(value.ToDisplayString(), Color.green);
         }
       }
     }
