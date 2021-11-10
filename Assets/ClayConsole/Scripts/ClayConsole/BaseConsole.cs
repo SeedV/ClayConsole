@@ -13,6 +13,7 @@ namespace ClayConsole {
     private const int _maxCols = 160;
     private const int _defaultRows = 15;
     private const int _defaultCols = 40;
+    private static readonly Color _defaultColor = Color.yellow;
 
     private protected BaseCharset _charset = null;
     private protected IKeyboardInput _keyboard = null;
@@ -90,43 +91,38 @@ namespace ClayConsole {
     }
 
     // Only visible and space characters are accepted. The cursor position is not affected by this
-    // method. If a '\0' character is passed and there is an existing character in the position, the
-    // existing character will be removed.
+    // method.
     public void PutChar(int row, int col, char c) {
-      PutChar(row, col, c, Color.yellow);
+      PutChar(row, col, c, _defaultColor);
     }
 
     public void PutChar(int row, int col, char c, Color color) {
       uint charCode = (uint)c;
-      bool hasOldValue = _buffer.TryGetValue((row, col), out var oldValue);
 
       if (_glyphs.TryGetValue(charCode, out var glyphRefObject)) {
         // The new object is cloned from the reference object. The life cycle of the new object is
         // maintained by _buffer.
-        if (hasOldValue && oldValue.glyphObject) {
-          Destroy(oldValue.glyphObject);
-        }
         var glyphObject = Instantiate(glyphRefObject);
         glyphObject.SetActive(true);
         glyphObject.GetComponent<Renderer>().material.SetColor("_Color", color);
         glyphObject.transform.parent = transform;
-        _buffer[(row, col)] = (c, glyphObject);
-        PlaceGlyphObject(row, col, glyphObject);
+        PutToBuffer(row, col, c, glyphObject);
       } else if (_charset.IsSpace(charCode)) {
         // Since spaces have no corresponding 3D glyphs, _buffer simply keeps a null reference for
         // every one of them.
-        if (hasOldValue && oldValue.glyphObject) {
-          Destroy(oldValue.glyphObject);
-        }
-        _buffer[(row, col)] = (c, null);
-      } else if (c == '\0') {
-        if (hasOldValue && oldValue.glyphObject) {
-          Destroy(oldValue.glyphObject);
-          _buffer.Remove((row, col));
-        }
+        PutToBuffer(row, col, c, null);
       } else {
         Debug.LogError(
             $"The character U+{charCode:X4} is not supported by PutChar.");
+      }
+    }
+
+    public void DeleteChar(int row, int col) {
+      if (_buffer.TryGetValue((row, col), out var oldValue)) {
+        if (oldValue.glyphObject) {
+          Destroy(oldValue.glyphObject);
+        }
+        _buffer.Remove((row, col));
       }
     }
 
@@ -141,10 +137,14 @@ namespace ClayConsole {
     }
 
     public void Write(string s) {
+      Write(s, _defaultColor);
+    }
+
+    public void Write(string s, Color color) {
       if (!string.IsNullOrEmpty(s)) {
         foreach (char c in s) {
           if (_charset.IsVisible(c) || _charset.IsSpace(c)) {
-            PutChar(CursorRow, CursorCol, c);
+            PutChar(CursorRow, CursorCol, c, color);
             MoveCursorToNext();
           } else if (_charset.IsNewline(c)) {
             MoveCursorToNewline();
@@ -159,7 +159,11 @@ namespace ClayConsole {
     }
 
     public void WriteLine(string s) {
-      Write(s + '\n');
+      WriteLine(s, _defaultColor);
+    }
+
+    public void WriteLine(string s, Color color) {
+      Write(s + '\n', color);
     }
 
     public void Scroll(int lines) {
@@ -170,10 +174,9 @@ namespace ClayConsole {
         for (int row = 0; row < Rows; row++) {
           for (int col = 0; col < Cols; col++) {
             if (row < Rows - 1) {
-              TryGetChar(row + 1, col, out char c);
-              PutChar(row, col, c);
+              MoveInBuffer(row + 1, col, row, col);
             } else {
-              PutChar(row, col, '\0');
+              DeleteChar(row, col);
             }
           }
         }
@@ -215,6 +218,25 @@ namespace ClayConsole {
     private protected abstract BaseCharset InitCharset();
 
     private protected abstract IKeyboardInput InitKeyboard();
+
+    private void PutToBuffer(int row, int col, char c, GameObject glyphObject) {
+      if (_buffer.TryGetValue((row, col), out var oldValue) && oldValue.glyphObject) {
+        Destroy(oldValue.glyphObject);
+      }
+      _buffer[(row, col)] = (c, glyphObject);
+      if (glyphObject) {
+        PlaceGlyphObject(row, col, glyphObject);
+      }
+    }
+
+    private void MoveInBuffer(int fromRow, int fromCol, int toRow, int toCol) {
+      if (_buffer.TryGetValue((fromRow, fromCol), out var glyph)) {
+        PutToBuffer(toRow, toCol, glyph.c, glyph.glyphObject);
+        _buffer.Remove((fromRow, fromCol));
+      } else {
+        DeleteChar(toRow, toCol);
+      }
+    }
 
     private void MoveCursorToNext() {
       if (CursorCol < Cols - 1) {
