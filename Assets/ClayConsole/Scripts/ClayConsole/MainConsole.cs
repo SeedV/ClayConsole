@@ -1,8 +1,9 @@
 using UnityEngine;
 
 namespace ClayConsole {
+  // TODO: support more kinds of screens.
   public enum ScreenType {
-    FlatScreen = 1,
+    FlatScreen,
   }
 
   // The base class of all kinds of Consoles.
@@ -54,8 +55,13 @@ namespace ClayConsole {
     }
 
     void Awake() {
-      // TODO: support more kinds of screens.
-      Screen = new FlatScreen(gameObject);
+      switch (ScreenType) {
+        case ScreenType.FlatScreen:
+          Screen = new FlatScreen(gameObject);
+          break;
+        default:
+          throw new System.NotSupportedException($"Screen type {ScreenType} is not supported yet.");
+      }
     }
 
     void OnGUI() {
