@@ -7,6 +7,7 @@ namespace ClayConsole {
     private const string _screenObjectName = "Screen";
     private const string _cursorObjectName = "Cursor";
     private const string _glyphsObjectNamePrefix = "Glyphs/";
+    private const string _mainColor = "_Color";
     private const int _minRows = 10;
     private const int _maxRows = 80;
     private const int _minCols = 10;
@@ -104,7 +105,7 @@ namespace ClayConsole {
         // maintained by _buffer.
         var glyphObject = Instantiate(glyphRefObject);
         glyphObject.SetActive(true);
-        glyphObject.GetComponent<Renderer>().material.SetColor("_Color", color);
+        glyphObject.GetComponent<Renderer>().material.SetColor(_mainColor, color);
         glyphObject.transform.parent = transform;
         PutToBuffer(row, col, c, glyphObject);
       } else if (_charset.IsSpace(charCode)) {
@@ -127,11 +128,18 @@ namespace ClayConsole {
     }
 
     public bool TryGetChar(int row, int col, out char c) {
+      return TryGetChar(row, col, out c, out Color _);
+    }
+
+    public bool TryGetChar(int row, int col, out char c, out Color color) {
       if (_buffer.TryGetValue((row, col), out var glyph)) {
         c = glyph.c;
+        color = glyph.glyphObject is null ? _defaultColor :
+            glyph.glyphObject.GetComponent<Renderer>().material.GetColor(_mainColor);
         return true;
       } else {
         c = '\0';
+        color = _defaultColor;
         return false;
       }
     }

@@ -7,7 +7,4 @@ public class GameManager : MonoBehaviour {
   void Start() {
     Console.Write("Hello, World!");
   }
-
-  void Update() {
-  }
 }
