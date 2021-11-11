@@ -13,7 +13,7 @@ handles basic text console APIs such as `Write`, `WriteLine`, `ReadLine`, etc.
 * In your script, control the console via the interface of
   [ClayConsole/MainConsole.cs](./Assets/ClayConsole/Scripts/ClayConsole/MainConsole.cs).
 
-## Demo Project: In-game ISB Shell
+## Demo Project: In-Game ISB Shell
 
 This repo is also a Unity project to demonstrate ClayConsole. It implements an
 in-game shell of the [ISB language](https://github.com/wixette/isb).
