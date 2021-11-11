@@ -85,7 +85,7 @@ public class Lab : MonoBehaviour {
   private Color RandomColor() {
     float h = UnityEngine.Random.Range(0f, 1f);
     float s = UnityEngine.Random.Range(0.9f, 1f);
-    float v = UnityEngine.Random.Range(0.5f, 1f);
+    float v = UnityEngine.Random.Range(0.7f, 1f);
     return Color.HSVToRGB(h, s, v);
   }
 
