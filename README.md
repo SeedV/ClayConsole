@@ -11,7 +11,7 @@ handles basic text console APIs such as `Write`, `WriteLine`, `ReadLine`, etc.
   dir.
 * Use `Prefabs/FlatConsole.prefab` to create a new console.
 * In your script, control the console via the interface of
-  [ClayConsole/MainConsole.c](./Assets/ClayConsole/Scripts/ClayConsole/MainConsole.cs).
+  [ClayConsole/MainConsole.cs](./Assets/ClayConsole/Scripts/ClayConsole/MainConsole.cs).
 
 ## Demo Project: In-game ISB Shell
 
