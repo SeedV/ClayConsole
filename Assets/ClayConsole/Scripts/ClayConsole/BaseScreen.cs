@@ -119,12 +119,7 @@ namespace ClayConsole {
 
     public void PutChar(int row, int col, char c, Color color) {
       uint charCode = (uint)c;
-
-      if (_glyphs.TryGetValue(charCode, out var glyphRefObject)) {
-        // The new object is cloned from the reference object. The life cycle of the new object is
-        // maintained by _buffer.
-        var glyphObject = Object.Instantiate(glyphRefObject);
-        glyphObject.SetActive(true);
+      if (TryCreateGlyphObject(charCode, out GameObject glyphObject)) {
         glyphObject.GetComponent<Renderer>().material.SetColor(_mainColor, color);
         glyphObject.transform.parent = _mainConsole.transform;
         PutToBuffer(row, col, c, glyphObject);
@@ -237,13 +232,31 @@ namespace ClayConsole {
       }
     }
 
-    internal abstract void OnUpdateSize(int row, int col);
+    internal bool TryCreateGlyphObject(char c, out GameObject glyphObject, bool active = true) {
+      return TryCreateGlyphObject((uint)c, out glyphObject);
+    }
 
-    internal abstract void OnUpdateCursorPos(int row, int col);
+    internal bool TryCreateGlyphObject(
+        uint charCode, out GameObject glyphObject, bool active = true) {
+      glyphObject = null;
+      if (_glyphs.TryGetValue(charCode, out var glyphRefObject)) {
+        // The new object is cloned from the reference object. The life cycle of the new object is
+        // maintained by _buffer.
+        glyphObject = Object.Instantiate(glyphRefObject);
+        glyphObject.SetActive(active);
+        return true;
+      } else {
+        return false;
+      }
+    }
 
-    internal abstract void PlaceGlyphObject(int row, int col, GameObject glyphObject);
+    private protected abstract void OnUpdateSize(int row, int col);
 
-    internal abstract BaseCharset InitCharset();
+    private protected abstract void OnUpdateCursorPos(int row, int col);
+
+    private protected abstract void PlaceGlyphObject(int row, int col, GameObject glyphObject);
+
+    private protected abstract BaseCharset InitCharset();
 
     private void PutToBuffer(int row, int col, char c, GameObject glyphObject) {
       if (_buffer.TryGetValue((row, col), out var oldValue) && oldValue.glyphObject) {

@@ -19,17 +19,17 @@ namespace ClayConsole {
         : base(mainConsole, rows, cols) {
     }
 
-    internal override BaseCharset InitCharset() {
+    private protected override BaseCharset InitCharset() {
       return new AsciiCharset();
     }
 
-    internal override void PlaceGlyphObject(int row, int col, GameObject glyphObject) {
+    private protected override void PlaceGlyphObject(int row, int col, GameObject glyphObject) {
       var o = GetCharTopLeft(row, col);
       glyphObject.transform.localPosition = new Vector3(o.x, o.y - _charSize.y + _baseLineHeight, 0f);
       glyphObject.transform.localScale = _charScale;
     }
 
-    internal override void OnUpdateSize(int row, int col) {
+    private protected override void OnUpdateSize(int row, int col) {
       _origin.x = -_width / 2f + _margin;
       _origin.y = _height / 2f - _margin;
       _padding.x = (_width - 2 * _margin) / Cols / 20f;
@@ -46,7 +46,7 @@ namespace ClayConsole {
       _cursor.transform.localScale = _cursorScale;
     }
 
-    internal override void OnUpdateCursorPos(int row, int col) {
+    private protected override void OnUpdateCursorPos(int row, int col) {
       var o = GetCharTopLeft(row, col);
       _cursor.transform.localPosition =
           new Vector3(o.x + _charSize.x / 2f, o.y - _charSize.y / 2.5f, 0f);

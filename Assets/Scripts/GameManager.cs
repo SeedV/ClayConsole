@@ -21,6 +21,7 @@ public class GameManager : MonoBehaviour {
   public static GameManager Instance = null;
 
   public MainConsole MainConsole;
+  public Lab Lab;
 
   private Engine _engine;
   private List<string> _multiLineCode;
@@ -35,11 +36,14 @@ public class GameManager : MonoBehaviour {
   }
 
   void Start() {
+    Lab.Screen = MainConsole.Screen;
     _engine = new Engine("ClayProgram", new Type[] { typeof(Shell) });
     _multiLineCode = new List<string>();
     MainConsole.WriteLine("Welcome to Interactive Small Basic");
     MainConsole.Write("] ");
     MainConsole.StartReadLineLoop(onReadLine);
+
+    Lab.Rain("Hello");
   }
 
   bool onReadLine(string line) {
