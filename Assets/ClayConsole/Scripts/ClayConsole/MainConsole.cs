@@ -56,7 +56,7 @@ namespace ClayConsole {
     }
 
     void OnGUI() {
-      if (_inputManager.Active && Event.current.type == EventType.KeyDown &&
+      if (_inputManager.Active && Event.current.isKey && Event.current.type == EventType.KeyDown &&
           _keyboard.TryConvertKeyCode(Event.current, out char c, out ControlKey controlKey)) {
         _inputManager.OnKeyInput(c, controlKey);
       }

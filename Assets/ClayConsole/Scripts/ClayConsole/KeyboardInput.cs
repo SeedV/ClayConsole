@@ -56,6 +56,9 @@ namespace ClayConsole {
       bool ret = true;
       c = '\0';
       controlKey = ControlKey.None;
+      bool shiftPressed = e.shift || e.modifiers == EventModifiers.Shift;
+      bool ctrlPressed = e.control || e.modifiers == EventModifiers.Control;
+      bool capsPressed = e.capsLock || e.modifiers == EventModifiers.CapsLock;
       switch (e.keyCode) {
         case KeyCode n when (n >= KeyCode.Keypad0 && n <= KeyCode.Keypad9):
           c = (char)('0' + (int)e.keyCode - (int)KeyCode.Keypad0);
@@ -63,14 +66,14 @@ namespace ClayConsole {
         case KeyCode n when (n >= KeyCode.Alpha0 && n <= KeyCode.Alpha9):
           {
             int i = (int)e.keyCode - (int)KeyCode.Alpha0;
-            c = e.shift ? _shiftedAlphaKeys[i] : (char)('0' + i);
+            c = shiftPressed ? _shiftedAlphaKeys[i] : (char)('0' + i);
           }
           break;
         case KeyCode n when (n >= KeyCode.A && n <= KeyCode.Z):
           {
             int i = (int)e.keyCode - (int)KeyCode.A;
-            c = (e.capsLock || e.shift) ? (char)('A' + i) : (char)('a' + i);
-            if (e.control) {
+            c = (capsPressed || shiftPressed) ? (char)('A' + i) : (char)('a' + i);
+            if (ctrlPressed) {
               controlKey = (ControlKey)((int)ControlKey.CtrlA + i);
             }
           }
@@ -97,40 +100,40 @@ namespace ClayConsole {
           c = '\n';
           break;
         case KeyCode.BackQuote:
-          c = e.shift ? '~' : '`';
+          c = shiftPressed ? '~' : '`';
           break;
         case KeyCode.Minus:
-          c = e.shift ? '_' : '-';
+          c = shiftPressed ? '_' : '-';
           break;
         case KeyCode.KeypadEquals:
           c = '=';
           break;
         case KeyCode.LeftBracket:
-          c = e.shift ? '{' : '[';
+          c = shiftPressed ? '{' : '[';
           break;
         case KeyCode.RightBracket:
-          c = e.shift ? '}' : ']';
+          c = shiftPressed ? '}' : ']';
           break;
         case KeyCode.Backslash:
-          c = e.shift ? '|' : '\\';
+          c = shiftPressed ? '|' : '\\';
           break;
         case KeyCode.Semicolon:
-          c = e.shift ? ':' : ';';
+          c = shiftPressed ? ':' : ';';
           break;
         case KeyCode.Quote:
-          c = e.shift ? '\"' : '\'';
+          c = shiftPressed ? '\"' : '\'';
           break;
         case KeyCode.Equals:
-          c = e.shift ? '+' : '=';
+          c = shiftPressed ? '+' : '=';
           break;
         case KeyCode.Comma:
-          c = e.shift ? '<' : ',';
+          c = shiftPressed ? '<' : ',';
           break;
         case KeyCode.Period:
-          c = e.shift ? '>' : '.';
+          c = shiftPressed ? '>' : '.';
           break;
         case KeyCode.Slash:
-          c = e.shift ? '?' : '/';
+          c = shiftPressed ? '?' : '/';
           break;
         case KeyCode.Tab:
           c = '\t';

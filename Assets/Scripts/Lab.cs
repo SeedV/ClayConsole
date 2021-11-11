@@ -68,7 +68,7 @@ public class Lab : MonoBehaviour {
   }
 
   private Vector3 RandomLocalScale() {
-    float scale = Random.Range(300, 500);
+    float scale = Random.Range(300, 400);
     return new Vector3(scale, scale, scale * 4);
   }
 }

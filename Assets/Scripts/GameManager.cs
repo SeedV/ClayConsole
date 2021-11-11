@@ -7,13 +7,15 @@ using ISB.Runtime;
 using ISB.Utilities;
 
 [Preserve]
-public class Shell
+public class Game
 {
     [Doc("Print to shell.")]
     [Preserve]
     public void Print(StringValue s)
     {
-        GameManager.Instance.MainConsole.WriteLine(s.ToString(), Color.cyan);
+      string text = s.ToString();
+      GameManager.Instance.MainConsole.WriteLine(text, Color.cyan);
+      GameManager.Instance.Lab.Rain(text);
     }
 }
 
@@ -37,13 +39,11 @@ public class GameManager : MonoBehaviour {
 
   void Start() {
     Lab.Screen = MainConsole.Screen;
-    _engine = new Engine("ClayProgram", new Type[] { typeof(Shell) });
+    _engine = new Engine("ClayProgram", new Type[] { typeof(Game) });
     _multiLineCode = new List<string>();
     MainConsole.WriteLine("Welcome to Interactive Small Basic");
     MainConsole.Write("] ");
     MainConsole.StartReadLineLoop(onReadLine);
-
-    Lab.Rain("Hello");
   }
 
   bool onReadLine(string line) {
