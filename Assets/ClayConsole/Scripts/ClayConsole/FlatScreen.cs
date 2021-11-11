@@ -25,7 +25,7 @@ namespace ClayConsole {
 
     internal override void PlaceGlyphObject(int row, int col, GameObject glyphObject) {
       var o = GetCharTopLeft(row, col);
-      glyphObject.transform.position = new Vector3(o.x, o.y - _charSize.y + _baseLineHeight, 0f);
+      glyphObject.transform.localPosition = new Vector3(o.x, o.y - _charSize.y + _baseLineHeight, 0f);
       glyphObject.transform.localScale = _charScale;
     }
 
@@ -48,7 +48,7 @@ namespace ClayConsole {
 
     internal override void OnUpdateCursorPos(int row, int col) {
       var o = GetCharTopLeft(row, col);
-      _cursor.transform.position =
+      _cursor.transform.localPosition =
           new Vector3(o.x + _charSize.x / 2f, o.y - _charSize.y / 2.5f, 0f);
     }
 
