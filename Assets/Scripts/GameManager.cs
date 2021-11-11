@@ -36,8 +36,10 @@ public class Game
 }
 
 public class GameManager : MonoBehaviour {
+  private const string _welcomeString = "Welcome to Interactive Small Basic";
   private const string _helpString =
-@"See https://github.com/wixette/isb for more info. Or, try the following statements:
+@"See https://github.com/wixette/isb
+Or, try the following statements:
 
 Game.Print(""Hello, World!"");
 
@@ -69,9 +71,13 @@ EndFor
   void Start() {
     MainConsole.Screen.Rows = 30;
     Lab.Screen = MainConsole.Screen;
-    _engine = new Engine("ClayProgram", new Type[] { typeof(Game) });
+    _engine = new Engine("ClayProgram",
+        new Type[] { typeof(Game) },  // Registers the Game lib.
+        new Type[] { typeof(ISB.Lib.BuiltIn) }); // Disables the built-in lib of ISB.
     _multiLineCode = new List<string>();
-    MainConsole.WriteLine("Welcome to Interactive Small Basic", Color.gray);
+    MainConsole.WriteLine(_welcomeString, Color.green);
+    MainConsole.WriteLine("");
+    MainConsole.WriteLine(_helpString, Color.green);
     MainConsole.Write("] ");
     MainConsole.StartReadLineLoop(onReadLine);
   }
