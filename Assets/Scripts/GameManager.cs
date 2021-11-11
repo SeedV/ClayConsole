@@ -41,7 +41,7 @@ public class GameManager : MonoBehaviour {
     Lab.Screen = MainConsole.Screen;
     _engine = new Engine("ClayProgram", new Type[] { typeof(Game) });
     _multiLineCode = new List<string>();
-    MainConsole.WriteLine("Welcome to Interactive Small Basic");
+    MainConsole.WriteLine("Welcome to Interactive Small Basic", Color.gray);
     MainConsole.Write("] ");
     MainConsole.StartReadLineLoop(onReadLine);
   }
@@ -49,31 +49,58 @@ public class GameManager : MonoBehaviour {
   bool onReadLine(string line) {
     if (!_inMultilineMode && line == "clear") {
       _engine.Reset();
+      ShowPromot();
     } else if (!_inMultilineMode && line == "help") {
       MainConsole.WriteLine(_engine.LibsHelpString);
+      ShowPromot();
     } else if (!_inMultilineMode && line == "list") {
       MainConsole.WriteLine(string.Join("\n", _engine.CodeLines));
+      ShowPromot();
     } else {
       string code = _inMultilineMode ? string.Join("\n", _multiLineCode) + "\n" + line : line;
       if (!_engine.Compile(code, false) && _engine.ErrorInfo.Contents.Count > 0) {
         if (_engine.ErrorInfo.Contents[_engine.ErrorInfo.Contents.Count - 1].Code ==
             Diagnostic.ErrorCode.UnexpectedEndOfStream) {
           _multiLineCode.Add(line);
+          ShowPromot();
         } else {
-          MainConsole.WriteLine(_engine.ErrorInfo.Contents[0].ToDisplayString());
+          ReportErrors(_engine);
+          ShowPromot();
         }
       } else {
         _multiLineCode.Clear();
-        if (!_engine.Run(false) && _engine.ErrorInfo.Contents.Count > 0) {
-          MainConsole.WriteLine(_engine.ErrorInfo.Contents[0].ToDisplayString());
-        }
-        if (_engine.StackCount > 0) {
-          BaseValue value = _engine.StackPop();
-          MainConsole.WriteLine(value.ToDisplayString(), Color.green);
-        }
+
+        Action<bool> doneCallback = (isSuccess) => {
+          if (!isSuccess) {
+            ReportErrors(_engine);
+            _engine.Reset();
+          } else if (_engine.StackCount > 0) {
+            string ret = _engine.StackTop.ToDisplayString();
+            MainConsole.WriteLine(ret, Color.green);
+          }
+          ShowPromot();
+        };
+        // Prevents the scripting engine from being stuck in an infinite loop.
+        const int maxInstructionsToExecute = 10000;
+        Func<int, bool> canContinueCallback =
+            (counter) => counter >= maxInstructionsToExecute ? false : true;
+        StartCoroutine(_engine.RunAsCoroutine(doneCallback, canContinueCallback, false));
       }
     }
-    MainConsole.Write(_inMultilineMode ? "> " : "] ");
     return true;
+  }
+
+  private void ReportErrors(Engine engine) {
+    var buffer = new List<string>();
+    foreach (var content in engine.ErrorInfo.Contents) {
+      buffer.Add(content.ToDisplayString());
+    }
+    string message = string.Join("\n", buffer);
+    Debug.Log(message);
+    MainConsole.WriteLine(message, new Color(1f, .5f, 0f));
+  }
+
+  private void ShowPromot() {
+    MainConsole.Write(_inMultilineMode ? "> " : "] ");
   }
 }

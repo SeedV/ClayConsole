@@ -11,12 +11,13 @@ public class Lab : MonoBehaviour {
   private const int _minY = 5;
   private const int _maxY = 55;
   private const int _maxCharactersPerAction = 12;
+  private const int _maxChildCount = 128;
   private const float _secondsBeforeDestroy = 20f;
 
   public BaseScreen Screen { get; set; }
 
   public void Rain(string s) {
-    if (!string.IsNullOrEmpty(s)) {
+    if (!string.IsNullOrEmpty(s) && transform.childCount < _maxChildCount) {
       int i = 0;
       int count = 0;
       int length = System.Math.Min(s.Length, _maxCharactersPerAction);
